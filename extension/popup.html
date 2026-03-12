@@ -1,0 +1,38 @@
+﻿<!DOCTYPE html>
+<html lang= zh-CN>
+<head>
+  <meta charset=UTF-8 />
+  <meta name=viewport content=width=device-width,initial-scale=1 />
+  <title>Snap2Markdown</title>
+  <link rel=stylesheet href=styles.css />
+</head>
+<body>
+  <main class=dialog>
+    <header class=dialog__header>
+      <div>
+        <h1>Snap2Markdown</h1>
+        <p>右键图片即可提取结构化 Markdown。</p>
+      </div>
+      <button class=ghost id=closeBtn aria-label=关闭>×</button>
+    </header>
+
+    <section class=preview>
+      <img id=previewImage alt=选中图片预览 />
+      <div class=status id=status>等待图片...</div>
+    </section>
+
+    <div class=actions>
+      <button id=copyBtn disabled>复制 Markdown</button>
+      <button id=downloadBtn disabled>下载 .md</button>
+    </div>
+
+    <textarea id=markdownOutput readonly placeholder=结果在这里显示></textarea>
+    <p class=hint>使用右上角按钮关闭，或点击任意空白区域外部时自动关闭。</p>
+    <p class=error hidden id=errorMessage></p>
+  </main>
+
+  <div class=toast hidden id=toast>复制成功</div>
+
+  <script src=popup.js type=module></script>
+</body>
+</html>
