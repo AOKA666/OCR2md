@@ -1,38 +1,53 @@
 ﻿<!DOCTYPE html>
-<html lang= zh-CN>
+<html lang="en">
 <head>
-  <meta charset=UTF-8 />
-  <meta name=viewport content=width=device-width,initial-scale=1 />
-  <title>Snap2Markdown</title>
-  <link rel=stylesheet href=styles.css />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Screenshot → Markdown</title>
+  <link rel="stylesheet" href="popup.css" />
 </head>
 <body>
-  <main class=dialog>
-    <header class=dialog__header>
+  <main class="dialog">
+    <header>
       <div>
-        <h1>Snap2Markdown</h1>
-        <p>右键图片即可提取结构化 Markdown。</p>
+        <h1>Screenshot → Markdown</h1>
+        <p>Region capture → OCR → AI → Markdown</p>
       </div>
-      <button class=ghost id=closeBtn aria-label=关闭>×</button>
+      <button class="ghost" id="closeBtn" aria-label="Close">×</button>
     </header>
 
-    <section class=preview>
-      <img id=previewImage alt=选中图片预览 />
-      <div class=status id=status>等待图片...</div>
+    <section class="steps">
+      <div class="step active" data-step="capture">1. Select Region</div>
+      <div class="step" data-step="ocr">2. OCR</div>
+      <div class="step" data-step="ai">3. AI to Markdown</div>
+      <div class="step" data-step="done">4. Review / Export</div>
     </section>
 
-    <div class=actions>
-      <button id=copyBtn disabled>复制 Markdown</button>
-      <button id=downloadBtn disabled>下载 .md</button>
+    <section class="preview">
+      <div class="image-frame">
+        <img id="previewImage" alt="Screenshot preview" />
+      </div>
+      <div id="statusLabel" class="status">Waiting for screenshot...</div>
+    </section>
+
+    <section id="statusLog" class="log"></section>
+
+    <textarea
+      id="markdownOutput"
+      readonly
+      placeholder="Markdown output will appear here"
+    ></textarea>
+
+    <div class="toolbar">
+      <button id="startCapture">Select Region</button>
+      <button id="copyBtn" disabled>Copy Markdown</button>
+      <button id="downloadBtn" disabled>Download .md</button>
     </div>
 
-    <textarea id=markdownOutput readonly placeholder=结果在这里显示></textarea>
-    <p class=hint>使用右上角按钮关闭，或点击任意空白区域外部时自动关闭。</p>
-    <p class=error hidden id=errorMessage></p>
+    <p class="hint">If OCR or Markdown generation fails, try capturing again.</p>
+    <p id="errorMessage" class="error" hidden></p>
   </main>
-
-  <div class=toast hidden id=toast>复制成功</div>
-
-  <script src=popup.js type=module></script>
+  <div id="toast" class="toast">Copied</div>
+  <script src="popup.js" type="module"></script>
 </body>
 </html>

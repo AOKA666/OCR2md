@@ -1,31 +1,60 @@
-{
+﻿{
   "manifest_version": 3,
-  "name": "Snap2Markdown",
-  "description": "Right-click an image to extract structured Markdown with AI.",
+  "name": "Screenshot to Markdown",
+  "description": "Capture a region, run OCR, and convert text to structured Markdown with Volcengine Doubao.",
   "version": "1.0.0",
   "action": {
-    "default_title": "Snap2Markdown",
-    "default_popup": "popup.html",
     "default_icon": {
       "16": "icons/icon16.png",
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
-    }
+    },
+    "default_popup": "popup.html"
   },
   "permissions": [
-    "contextMenus",
+    "activeTab",
+    "scripting",
     "storage",
-    "clipboardWrite"
+    "clipboardWrite",
+    "contextMenus",
+    "offscreen"
   ],
   "host_permissions": [
+    "https://ark.cn-beijing.volces.com/*",
     "<all_urls>"
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "capture.js",
+        "capture.css",
+        "assets/vendor/tesseract.min.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ],
+  "commands": {
+    "start_capture": {
+      "suggested_key": {
+        "default": "Alt+Shift+S"
+      },
+      "description": "Start region capture + OCR"
+    }
+  },
+  "options_page": "options.html",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   }
+
 }

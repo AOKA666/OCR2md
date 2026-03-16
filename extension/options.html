@@ -1,0 +1,22 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Screenshot to Markdown Settings</title>
+  <link rel="stylesheet" href="options.css" />
+</head>
+<body>
+  <main>
+    <h1>API Key Settings</h1>
+    <p>Enter your Volcengine Ark API Key (ARK_API_KEY) to generate Markdown with Doubao.</p>
+    <form id="optionsForm">
+      <label for="apiKey">Volcengine Ark API Key</label>
+      <input id="apiKey" name="apiKey" type="password" placeholder="ark-..." required />
+      <button type="submit">Save</button>
+    </form>
+    <p id="optionsStatus"></p>
+  </main>
+  <script src="options.js"></script>
+</body>
+</html>

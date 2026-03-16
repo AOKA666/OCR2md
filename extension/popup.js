@@ -1,37 +1,28 @@
-﻿const API_ENDPOINT = 'https://api.snap2markdown.example/api/extract-markdown';
-
-const previewImage = document.getElementById('previewImage');
-const statusEl = document.getElementById('status');
-const markdownOutput = document.getElementById('markdownOutput');
+﻿const startBtn = document.getElementById('startCapture');
 const copyBtn = document.getElementById('copyBtn');
 const downloadBtn = document.getElementById('downloadBtn');
+const previewImage = document.getElementById('previewImage');
+const statusLabel = document.getElementById('statusLabel');
+const statusLog = document.getElementById('statusLog');
+const markdownOutput = document.getElementById('markdownOutput');
 const errorMessage = document.getElementById('errorMessage');
 const toast = document.getElementById('toast');
 const closeBtn = document.getElementById('closeBtn');
-
-const params = new URLSearchParams(window.location.search);
-const imageUrl = params.get('imageUrl');
+const steps = document.querySelectorAll('.step');
 
 let currentMarkdown = '';
+const port = chrome.runtime.connect({ name: 'popup' });
 
-closeBtn.addEventListener('click', () => window.close());
-
-if (!imageUrl) {
-  setError('无法获取图片 URL，请重新从图片右键菜单打开。');
-  setStatus('等待图片...');
-} else {
-  previewImage.src = imageUrl;
-  fetchMarkdown(imageUrl);
-}
+startBtn.addEventListener('click', () => {
+  resetState();
+  statusLabel.textContent = 'Injecting capture tool...';
+  port.postMessage({ type: 'requestCapture' });
+});
 
 copyBtn.addEventListener('click', async () => {
   if (!currentMarkdown) return;
-  try {
-    await navigator.clipboard.writeText(currentMarkdown);
-    showToast('Markdown 已复制');
-  } catch (error) {
-    setError('复制失败，请手动复制。');
-  }
+  await navigator.clipboard.writeText(currentMarkdown);
+  showToast('Markdown copied');
 });
 
 downloadBtn.addEventListener('click', () => {
@@ -40,84 +31,79 @@ downloadBtn.addEventListener('click', () => {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = snap2markdown-.md;
+  a.download = 'screenshot.md';
   a.click();
   URL.revokeObjectURL(url);
 });
 
-function setStatus(text, completed = false) {
-  statusEl.textContent = text;
-  statusEl.classList.toggle('completed', completed);
-}
+closeBtn.addEventListener('click', () => window.close());
 
-function setError(message) {
-  errorMessage.textContent = message;
-  errorMessage.classList.remove('hidden');
-}
+port.onMessage.addListener(message => {
+  if (message?.type === 'job') {
+    renderJob(message.job);
+  } else if (message?.type === 'error') {
+    showError(message.text || 'Operation failed');
+  }
+});
 
-function hideError() {
-  errorMessage.textContent = '';
-  errorMessage.classList.add('hidden');
-}
-
-async function fetchMarkdown(imageSrc) {
-  setStatus('正在处理图片...', false);
-  hideError();
-  try {
-    const base64 = await fetchImageAsBase64(imageSrc);
-    const response = await fetch(API_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        image: base64,
-        sourceUrl: imageSrc
-      })
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text().catch(() => '无法识别');
-      throw new Error(服务响应错误：);
-    }
-
-    const payload = await response.json();
-    const markdown = payload.markdown || payload.result || '';
-
-    if (!markdown.trim()) {
-      throw new Error('AI 没有返回有效的 Markdown。');
-    }
-
-    currentMarkdown = markdown.trim();
+function renderJob(job) {
+  errorMessage.hidden = true;
+  previewImage.src = job.croppedImage ? `data:image/png;base64,${job.croppedImage}` : '';
+  updateLog(job.log);
+  updateStatus(job.stage);
+  markStep(job.stage);
+  if (job.markdown) {
+    currentMarkdown = job.markdown;
     markdownOutput.value = currentMarkdown;
     copyBtn.disabled = false;
     downloadBtn.disabled = false;
-    setStatus('完成', true);
-  } catch (error) {
-    console.error(error);
-    setStatus('失败', false);
-    setError(error.message || '处理失败，请稍后重试。');
+  }
+  if (job.stage === 'error') {
+    showError(job.error || 'Processing failed. Please try again.');
   }
 }
 
-async function fetchImageAsBase64(src) {
-  const response = await fetch(src);
-  if (!response.ok) {
-    throw new Error('读取图片失败，可能是跨域限制。');
-  }
-  const blob = await response.blob();
-  return await new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result.split(',')[1]);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
+function updateLog(messages = []) {
+  statusLog.innerHTML = messages.map(line => `<div>${line}</div>`).join('');
+}
+
+function updateStatus(stage) {
+  const map = {
+    pending: 'Waiting for screenshot...',
+    captured: 'Screenshot captured. OCR in progress...',
+    ocr: 'OCR completed. Sending to AI...',
+    done: 'Markdown is ready',
+    error: 'Processing failed'
+  };
+  statusLabel.textContent = map[stage] || 'Waiting for screenshot...';
+}
+
+function markStep(stage) {
+  steps.forEach(step => {
+    const name = step.dataset.step;
+    step.classList.toggle('active', name === stage || (stage === 'done' && name === 'done') || (stage === 'ocr' && name === 'ai'));
   });
+}
+
+function resetState() {
+  currentMarkdown = '';
+  markdownOutput.value = '';
+  copyBtn.disabled = true;
+  downloadBtn.disabled = true;
+  statusLog.textContent = '';
+  previewImage.src = '';
+  errorMessage.hidden = true;
+}
+
+function showError(message) {
+  errorMessage.textContent = message;
+  errorMessage.hidden = false;
 }
 
 function showToast(message) {
   toast.textContent = message;
   toast.classList.add('visible');
-  toast.classList.remove('hidden');
-  setTimeout(() => {
-    toast.classList.remove('visible');
-    toast.classList.add('hidden');
-  }, 2200);
+  setTimeout(() => toast.classList.remove('visible'), 2200);
 }
+
+resetState();
