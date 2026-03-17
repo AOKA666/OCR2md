@@ -1,22 +1,18 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Screenshot to Markdown Settings</title>
+  <title>OCR2Markdown 设置</title>
   <link rel="stylesheet" href="options.css" />
 </head>
 <body>
   <main>
-    <h1>API Key Settings</h1>
-    <p>Enter your Volcengine Ark API Key (ARK_API_KEY) to generate Markdown with Doubao.</p>
-    <form id="optionsForm">
-      <label for="apiKey">Volcengine Ark API Key</label>
-      <input id="apiKey" name="apiKey" type="password" placeholder="ark-..." required />
-      <button type="submit">Save</button>
-    </form>
-    <p id="optionsStatus"></p>
+    <h1>统一后端模式</h1>
+    <p>当前插件已切换为后端统一调用，无需用户输入 API Key。</p>
+    <p id="optionsStatus">如需调整接口地址或鉴权，请修改 <code>extension/ai.js</code> 中的配置。</p>
   </main>
   <script src="options.js"></script>
 </body>
 </html>
+
