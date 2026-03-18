@@ -56,27 +56,6 @@ header p {
   cursor: pointer;
 }
 
-.steps {
-  display: flex;
-  gap: 6px;
-  font-size: 0.75rem;
-}
-
-.step {
-  flex: 1;
-  padding: 6px;
-  border-radius: 8px;
-  text-align: center;
-  border: 1px solid rgba(148, 163, 184, 0.4);
-  color: #94a3b8;
-}
-
-.step.active {
-  color: #38bdf8;
-  border-color: #38bdf8;
-  background: rgba(56, 189, 248, 0.1);
-}
-
 .preview {
   border: 1px dashed rgba(148, 163, 184, 0.3);
   border-radius: 12px;

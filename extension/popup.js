@@ -8,7 +8,6 @@ const markdownOutput = document.getElementById('markdownOutput');
 const errorMessage = document.getElementById('errorMessage');
 const toast = document.getElementById('toast');
 const closeBtn = document.getElementById('closeBtn');
-const steps = document.querySelectorAll('.step');
 
 let currentMarkdown = '';
 const port = chrome.runtime.connect({ name: 'popup' });
@@ -51,7 +50,6 @@ function renderJob(job) {
   previewImage.src = job.croppedImage ? `data:image/png;base64,${job.croppedImage}` : '';
   updateLog(job.log);
   updateStatus(job.stage);
-  markStep(job.stage);
   if (job.markdown) {
     currentMarkdown = job.markdown;
     markdownOutput.value = currentMarkdown;
@@ -76,13 +74,6 @@ function updateStatus(stage) {
     error: 'Processing failed'
   };
   statusLabel.textContent = map[stage] || 'Waiting for screenshot...';
-}
-
-function markStep(stage) {
-  steps.forEach(step => {
-    const name = step.dataset.step;
-    step.classList.toggle('active', name === stage || (stage === 'done' && name === 'done') || (stage === 'ocr' && name === 'ai'));
-  });
 }
 
 function resetState() {
