@@ -1,4 +1,4 @@
-const BACKEND_URL = 'https://your-project.vercel.app/api/markdown';
+const BACKEND_URL = 'https://www.ocr2md.online/api/markdown';
 const BACKEND_TOKEN = '';
 
 export async function runAi(ocrText) {
