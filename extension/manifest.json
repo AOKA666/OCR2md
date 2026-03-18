@@ -41,7 +41,8 @@
   "commands": {
     "start_capture": {
       "suggested_key": {
-        "default": "Alt+Shift+X"
+        "default": "Ctrl+Shift+X",
+        "mac": "Command+Shift+X"
       },
       "description": "Start region capture + OCR"
     }
