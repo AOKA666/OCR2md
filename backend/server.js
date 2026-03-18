@@ -14,7 +14,10 @@ Requirements:
 - convert tables when obvious
 - format code blocks if present
 - clean up obvious OCR errors
-- keep the original text flow when structure is unclear`;
+- keep the original text flow when structure is unclear
+- output only the final Markdown content
+- do not add any explanation, introduction, conclusion, or notes
+- do not wrap the output in code fences`;
 
 function sendJson(res, statusCode, payload) {
   res.writeHead(statusCode, {
@@ -60,7 +63,7 @@ async function callDoubao(ocrText) {
       messages: [
         {
           role: 'system',
-          content: 'You are a Markdown formatter that converts OCR output into structured Markdown.'
+          content: 'You convert OCR text to Markdown and must return only final Markdown content with no explanations.'
         },
         {
           role: 'user',
@@ -133,4 +136,3 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, () => {
   console.log(`[ocr2md-backend] listening on http://127.0.0.1:${PORT}`);
 });
-

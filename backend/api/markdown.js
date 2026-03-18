@@ -11,7 +11,10 @@ Requirements:
 - convert tables when obvious
 - format code blocks if present
 - clean up obvious OCR errors
-- keep the original text flow when structure is unclear`;
+- keep the original text flow when structure is unclear
+- output only the final Markdown content
+- do not add any explanation, introduction, conclusion, or notes
+- do not wrap the output in code fences`;
 
 function setCors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -43,7 +46,7 @@ async function callDoubao(ocrText) {
       messages: [
         {
           role: 'system',
-          content: 'You are a Markdown formatter that converts OCR output into structured Markdown.'
+          content: 'You convert OCR text to Markdown and must return only final Markdown content with no explanations.'
         },
         {
           role: 'user',
@@ -102,4 +105,3 @@ module.exports = async function handler(req, res) {
     sendJson(res, 500, { error: error?.message || 'Internal Server Error' });
   }
 };
-

@@ -291,7 +291,7 @@
   }
 
   function handleGlobalKey(event) {
-    if (event.altKey && event.shiftKey && event.code === 'KeyS') {
+    if (event.altKey && event.shiftKey && event.code === 'KeyX') {
       const target = event.target;
       if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
         return;
