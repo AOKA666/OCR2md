@@ -3,7 +3,10 @@ let queue = Promise.resolve();
 
 function isKnownTesseractNoise(text = '') {
   const s = String(text || '');
+  const diacriticsNotice = /^Detected\s+\d+\s+diacritics\b/i.test(s.trim());
   return (
+    diacriticsNotice ||
+    s.includes('diacritics') ||
     s.includes('assets/vendor/tesseract.min.js') ||
     s.includes('assets/vendor/worker.min.js') ||
     s.includes('Aborted(') ||
