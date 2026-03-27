@@ -1,8 +1,8 @@
 ﻿{
   "manifest_version": 3,
   "name": "Screenshot to Markdown",
-  "description": "Capture a region, run OCR, and convert text to structured Markdown with a unified backend API.",
-  "version": "1.0.0",
+  "description": "Capture a region, run OCR, and convert text to structured Markdown.",
+  "version": "1.0.1",
   "action": {
     "default_icon": {
       "16": "icons/icon16.png",
@@ -14,10 +14,7 @@
   "permissions": [
     "activeTab",
     "scripting",
-    "storage",
-    "clipboardWrite",
-    "contextMenus",
-    "offscreen"
+    "clipboardWrite"
   ],
   "background": {
     "service_worker": "background.js",
@@ -53,5 +50,4 @@
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   }
-
 }
