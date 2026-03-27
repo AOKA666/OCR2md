@@ -3,9 +3,13 @@ import { runAi } from './ai.js';
 
 const popupPorts = new Set();
 let latestJob = null;
+const actionApi = chrome.action ?? chrome.browserAction;
+const contextMenusApi = chrome.contextMenus;
+const commandsApi = chrome.commands;
 
 chrome.runtime.onInstalled.addListener(() => {
-  chrome.contextMenus.create({
+  if (!contextMenusApi?.create) return;
+  contextMenusApi.create({
     id: 'capture-area',
     title: 'Capture region and generate Markdown',
     contexts: ['action', 'page']
@@ -17,29 +21,35 @@ function startCaptureInTab(tabId) {
   injectCapture(tabId);
 }
 
-chrome.action.onClicked.addListener(tab => {
-  startCaptureInTab(tab?.id);
-});
+if (actionApi?.onClicked?.addListener) {
+  actionApi.onClicked.addListener(tab => {
+    startCaptureInTab(tab?.id);
+  });
+}
 
-chrome.contextMenus.onClicked.addListener((info, tab) => {
-  if (info.menuItemId === 'capture-area' && tab?.id) {
-    startCaptureInTab(tab.id);
-  }
-});
+if (contextMenusApi?.onClicked?.addListener) {
+  contextMenusApi.onClicked.addListener((info, tab) => {
+    if (info.menuItemId === 'capture-area' && tab?.id) {
+      startCaptureInTab(tab.id);
+    }
+  });
+}
 
-chrome.commands.onCommand.addListener(command => {
-  if (command === 'start_capture') {
-    chrome.tabs
-      .query({ active: true, currentWindow: true })
-      .then(tabs => {
-        const current = tabs[0];
-        if (current?.id) {
-          startCaptureInTab(current.id);
-        }
-      })
-      .catch(() => {});
-  }
-});
+if (commandsApi?.onCommand?.addListener) {
+  commandsApi.onCommand.addListener(command => {
+    if (command === 'start_capture') {
+      chrome.tabs
+        .query({ active: true, currentWindow: true })
+        .then(tabs => {
+          const current = tabs[0];
+          if (current?.id) {
+            startCaptureInTab(current.id);
+          }
+        })
+        .catch(() => {});
+    }
+  });
+}
 
 chrome.runtime.onConnect.addListener(port => {
   if (port.name !== 'popup') return;
@@ -63,6 +73,16 @@ chrome.runtime.onConnect.addListener(port => {
 });
 
 chrome.runtime.onMessage.addListener((message, sender) => {
+  if (message?.type === 'requestCapture') {
+    chrome.tabs.query({ active: true, currentWindow: true }).then(tabs => {
+      const current = tabs[0];
+      if (current?.id) {
+        startCaptureInTab(current.id);
+      }
+    }).catch(() => {});
+    return;
+  }
+
   if (message?.type === 'selectionComplete' && sender.tab?.id) {
     handleSelection(sender.tab, message.rect, message.viewport, message.pageUrl).catch(() => {});
   }

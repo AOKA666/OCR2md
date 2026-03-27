@@ -1,46 +1,13 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Screenshot → Markdown</title>
+  <title>Select Region</title>
   <link rel="stylesheet" href="popup.css" />
 </head>
 <body>
-  <main class="dialog">
-    <header>
-      <div>
-        <h1>Screenshot → Markdown</h1>
-        <p>Region capture → OCR → AI → Markdown</p>
-      </div>
-      <button class="ghost" id="closeBtn" aria-label="Close">×</button>
-    </header>
-
-    <div class="toolbar">
-      <button id="startCapture">Select Region</button>
-      <button id="copyBtn" disabled>Copy Markdown</button>
-      <button id="downloadBtn" disabled>Download .md</button>
-    </div>
-
-    <section class="preview">
-      <div class="image-frame">
-        <img id="previewImage" alt="Screenshot preview" />
-      </div>
-      <div id="statusLabel" class="status">Waiting for screenshot...</div>
-    </section>
-
-    <section id="statusLog" class="log"></section>
-
-    <textarea
-      id="markdownOutput"
-      readonly
-      placeholder="Markdown output will appear here"
-    ></textarea>
-
-    <p class="hint">If OCR or Markdown generation fails, try capturing again.</p>
-    <p id="errorMessage" class="error" hidden></p>
-  </main>
-  <div id="toast" class="toast">Copied</div>
+  <button id="startCapture" aria-label="Select region">Select</button>
   <script src="popup.js" type="module"></script>
 </body>
 </html>

@@ -13,8 +13,11 @@
   },
   "permissions": [
     "activeTab",
+    "tabs",
     "scripting",
-    "clipboardWrite"
+    "clipboardWrite",
+    "contextMenus",
+    "offscreen"
   ],
   "background": {
     "service_worker": "background.js",
