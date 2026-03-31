@@ -21,6 +21,11 @@ function startCaptureInTab(tabId) {
   injectCapture(tabId);
 }
 
+async function getActiveTab() {
+  const tabs = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+  return tabs[0] ?? null;
+}
+
 if (actionApi?.onClicked?.addListener) {
   actionApi.onClicked.addListener(tab => {
     startCaptureInTab(tab?.id);
@@ -38,13 +43,9 @@ if (contextMenusApi?.onClicked?.addListener) {
 if (commandsApi?.onCommand?.addListener) {
   commandsApi.onCommand.addListener(command => {
     if (command === 'start_capture') {
-      chrome.tabs
-        .query({ active: true, currentWindow: true })
-        .then(tabs => {
-          const current = tabs[0];
-          if (current?.id) {
-            startCaptureInTab(current.id);
-          }
+      getActiveTab()
+        .then(current => {
+          if (current?.id) startCaptureInTab(current.id);
         })
         .catch(() => {});
     }
@@ -57,13 +58,14 @@ chrome.runtime.onConnect.addListener(port => {
   port.onDisconnect.addListener(() => popupPorts.delete(port));
   port.onMessage.addListener(message => {
     if (message?.type === 'requestCapture') {
-      chrome.tabs.query({ active: true, currentWindow: true }).then(tabs => {
-        const current = tabs[0];
+      getActiveTab().then(current => {
         if (current?.id) {
           startCaptureInTab(current.id);
         } else {
           port.postMessage({ type: 'error', text: 'Unable to locate the active tab.' });
         }
+      }).catch(() => {
+        port.postMessage({ type: 'error', text: 'Unable to locate the active tab.' });
       });
     }
   });
@@ -74,12 +76,15 @@ chrome.runtime.onConnect.addListener(port => {
 
 chrome.runtime.onMessage.addListener((message, sender) => {
   if (message?.type === 'requestCapture') {
-    chrome.tabs.query({ active: true, currentWindow: true }).then(tabs => {
-      const current = tabs[0];
+    getActiveTab().then(current => {
       if (current?.id) {
         startCaptureInTab(current.id);
+      } else {
+        console.warn('requestCapture: no active tab found');
       }
-    }).catch(() => {});
+    }).catch(error => {
+      console.warn('requestCapture failed to query active tab', error);
+    });
     return;
   }
 
@@ -90,12 +95,22 @@ chrome.runtime.onMessage.addListener((message, sender) => {
 
 async function injectCapture(tabId) {
   try {
+    await chrome.scripting.insertCSS({
+      target: { tabId },
+      files: ['capture.css']
+    });
     await chrome.scripting.executeScript({
       target: { tabId },
       files: ['capture.js']
     });
-    chrome.tabs.sendMessage(tabId, { type: 'startCapture' }).catch(() => {});
+    await chrome.scripting.executeScript({
+      target: { tabId },
+      func: () => {
+        window.__smdCaptureBridge?.startCapture?.();
+      }
+    });
   } catch (error) {
+    console.error('injectCapture failed', { tabId, error });
     broadcast({ type: 'error', text: 'Failed to inject the capture tool. Please refresh and try again.' }, tabId);
   }
 }

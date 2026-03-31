@@ -9,8 +9,6 @@ function isKnownTesseractNoise(text = '') {
     s.includes('diacritics') ||
     s.includes('assets/vendor/tesseract.min.js') ||
     s.includes('assets/vendor/worker.min.js') ||
-    s.includes('Aborted(') ||
-    s.includes('wasm') ||
     s.includes("Failed to execute 'importScripts'")
   );
 }
@@ -238,22 +236,38 @@ async function getWorker() {
         throw new Error('Failed to load OCR tool');
       }
       const workerPath = chrome.runtime.getURL('assets/vendor/worker.min.js');
-      const corePath = chrome.runtime.getURL('assets/vendor/tesseract-core.wasm.js');
-      const langPath = chrome.runtime.getURL('assets/tessdata');
-      const worker = await self.Tesseract.createWorker({
-        workerPath,
-        corePath,
-        langPath,
-        workerBlobURL: false,
-        logger: () => {},
-        errorHandler: err => {
-          if (isKnownTesseractNoise(err?.message || err)) return;
-          throw err;
+      const langPath = chrome.runtime.getURL('assets/tessdata/');
+      const corePaths = [
+        chrome.runtime.getURL('assets/vendor/tesseract-core-simd.wasm.js'),
+        chrome.runtime.getURL('assets/vendor/tesseract-core.wasm.js')
+      ];
+
+      let lastError = null;
+      for (const corePath of corePaths) {
+        try {
+          const worker = await self.Tesseract.createWorker({
+            workerPath,
+            corePath,
+            langPath,
+            workerBlobURL: false,
+            logger: () => {},
+            errorHandler: err => {
+              const message = toErrorMessage(err);
+              if (!isKnownTesseractNoise(message)) {
+                console.warn('OCR core stderr:', message);
+              }
+            }
+          });
+          await worker.loadLanguage('chi_sim+eng');
+          await worker.initialize('chi_sim+eng');
+          return worker;
+        } catch (error) {
+          lastError = error;
+          console.error('OCR worker init failed for corePath:', corePath, error);
         }
-      });
-      await worker.loadLanguage('chi_sim+eng');
-      await worker.initialize('chi_sim+eng');
-      return worker;
+      }
+
+      throw new Error(`OCR worker initialization failed: ${toErrorMessage(lastError)}`);
     })();
   }
   return workerPromise;
